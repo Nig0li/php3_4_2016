@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<project name="php3" default="build" basedir=".">
+
+    <target name="vars">
+        <php function="date" returnProperty="data.time">
+            <param value="Y-m-d-H-i-s"/>
+        </php>
+        <resolvepath propertyName="target.dir" path="C:\OpenServer\domains\git"/>
+        <property name="domain" value="test.com"/>
+    </target>
+
+    <target name="copy">
+        <copy todir="${target.dir}">
+            <fileset dir="${project.basedir}">
+                <include name="**"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="config">
+        <copy file="${project.basedir}\build\production\config.php" tofile="${target.dir}\protected\config.php" overwrite="true">
+            <filterchain>
+                <replacetokens begintoken="{{" endtoken="}}">
+                    <token key="domain" value="${domain}"/>
+                    <token key="db.user" value="root"/>
+                    <token key="db.password" value=""/>
+                </replacetokens>
+            </filterchain>
+        </copy>
+    </target>
+
+    <target name="composer">
+        <exec dir="${target.dir}" command="php C:\OpenServer\bin\composer.phar install"
+              checkreturn="true" passthru="true" error="stdout"/>
+    </target>
+
+    <target name="build" depends="vars, copy, config, composer"></target>
+
+</project>
